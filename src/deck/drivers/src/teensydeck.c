@@ -63,16 +63,16 @@ int sending_outer = 0;
 int set_control_outer = 0;
 
 /////////////INTERNAL LOG VARIABLES
-logVarId_t idThrust;
-float thrust;
+logVarId_t idPosx, idPosy, idPosz, idVelBodyX, idVelBodyY, idVelBodyZ;
+float posx, posy, posz, velBodyX, velBodyY, velBodyZ;
+
+logvarID_t idOrientationRoll, idOrientationPitch, idOrientationYaw;
+float orientationRoll, orientationPitch, orientationYaw;
 logVarId_t idGyroX, idGyroY, idGyroZ, idAccX, idAccY, idAccZ;
 float gyroX, gyroY, gyroZ, accX, accY, accZ;
-logVarId_t idControllerRoll, idControllerPitch;
-logVarId_t idControllerRollRate, idControllerPitchRate, idControllerYawRate;
-float controllerRoll, controllerPitch;
-float  controllerRollRate, controllerPitchRate, controllerYawRate;
-logVarId_t idStateEstimateRoll, idStateEstimatePitch;
-float stateEstimateRoll, stateEstimatePitch;
+logVarId_t idMotor1, idMotor2, idMotor3, idMotor4;
+int motor1, motor2, motor3, motor4;
+
 paramVarId_t idSnnType;
 int snnType;
 
@@ -87,52 +87,66 @@ void serialParseMessageOut(void)
 void setControlInMessage(void) 
 {
     // Get roll input values and put them in the message
-    thrust = logGetFloat(idThrust);
     gyroX = logGetFloat(idGyroX);
     gyroY = logGetFloat(idGyroY);
     gyroZ = logGetFloat(idGyroZ);
     accX = logGetFloat(idAccX);
     accY = logGetFloat(idAccY);
     accZ = logGetFloat(idAccZ);
+    posx = logGetFloat(idPosx);
+    posy = logGetFloat(idPosy);
+    posz = logGetFloat(idPosz);
+    velBodyX = logGetFloat(idVelBodyX);
+    velBodyY = logGetFloat(idVelBodyY);
+    velBodyZ = logGetFloat(idVelBodyZ);
+    orientationRoll = logGetFloat(idOrientationRoll);
+    orientationPitch = logGetFloat(idOrientationPitch);
+    orientationYaw = logGetFloat(idOrientationYaw);
     
-    snnType = paramGetInt(idSnnType);
+    // snnType = paramGetInt(idSnnType);
 
-    if ((snnType == 0) || (snnType == 1) || (snnType == 3)){
-        controllerRoll = logGetFloat(idControllerRoll);
-        controllerPitch = logGetFloat(idControllerPitch);
-        controllerYawRate = logGetFloat(idControllerYawRate);
-    } 
-    if (snnType == 2) {
-        controllerRollRate = logGetFloat(idControllerRollRate);
-        controllerPitchRate = logGetFloat(idControllerPitchRate);
-        controllerYawRate = logGetFloat(idControllerYawRate);
-    }
-    if (snnType == 3) { 
-        stateEstimateRoll = logGetFloat(idStateEstimateRoll);
-        stateEstimatePitch = logGetFloat(idStateEstimatePitch);
-    }
+    // if ((snnType == 0) || (snnType == 1) || (snnType == 3)){
+    //     controllerRoll = logGetFloat(idControllerRoll);
+    //     controllerPitch = logGetFloat(idControllerPitch);
+    //     controllerYawRate = logGetFloat(idControllerYawRate);
+    // } 
+    // if (snnType == 2) {
+    //     controllerRollRate = logGetFloat(idControllerRollRate);
+    //     controllerPitchRate = logGetFloat(idControllerPitchRate);
+    //     controllerYawRate = logGetFloat(idControllerYawRate);
+    // }
+    // if (snnType == 3) { 
+    //     stateEstimateRoll = logGetFloat(idStateEstimateRoll);
+    //     stateEstimatePitch = logGetFloat(idStateEstimatePitch);
+    // }
 
-    myserial_control_in.thrust = thrust;
-    myserial_control_in.roll_gyro = gyroX;
-    myserial_control_in.pitch_gyro = gyroY;
-    myserial_control_in.yaw_gyro = gyroZ;
-    myserial_control_in.x_acc = accX;
-    myserial_control_in.y_acc = accY;
-    myserial_control_in.z_acc = accZ;
-    if ((snnType == 0) || (snnType == 1) || (snnType == 3) ){
-        myserial_control_in.roll = controllerRoll;
-        myserial_control_in.pitch = controllerPitch;
-        myserial_control_in.yaw = controllerYawRate;
-    } 
-    if (snnType == 2) {
-        myserial_control_in.roll = controllerRollRate;
-        myserial_control_in.pitch = controllerPitchRate;
-        myserial_control_in.yaw = controllerYawRate;
-    }
-    if (snnType == 3) {
-        myserial_control_in.x_acc = stateEstimatePitch;
-        myserial_control_in.y_acc = stateEstimateRoll;
-    }
+    myserial_control_in.pos_x = pos_x;
+    myserial_control_in.pos_y = pos_y;
+    myserial_control_in.pos_z = pos_z;
+    myserial_control_in.vel_body_x = velBodyX;
+    myserial_control_in.vel_body_y = velBodyY;
+    myserial_control_in.vel_body_z = velBodyZ;
+    myserial_control_in.gyro_x = gyroX;
+    myserial_control_in.gyro_y = gyroY;
+    myserial_control_in.gyro_z = gyroZ;
+    myserial_control_in.roll = orientationRoll;
+    myserial_control_in.pitch = orientationPitch;
+    myserial_control_in.yaw = orientationYaw;
+
+    // if ((snnType == 0) || (snnType == 1) || (snnType == 3) ){
+    //     myserial_control_in.roll = controllerRoll;
+    //     myserial_control_in.pitch = controllerPitch;
+    //     myserial_control_in.yaw = controllerYawRate;
+    // } 
+    // if (snnType == 2) {
+    //     myserial_control_in.roll = controllerRollRate;
+    //     myserial_control_in.pitch = controllerPitchRate;
+    //     myserial_control_in.yaw = controllerYawRate;
+    // }
+    // if (snnType == 3) {
+    //     myserial_control_in.x_acc = stateEstimatePitch;
+    //     myserial_control_in.y_acc = stateEstimateRoll;
+    // }
 }
 
 // Read a control out message over uart
@@ -208,21 +222,31 @@ void teensyInit(DeckInfo* info)
 
 
   // get the logVarIds that are used to get the state/target info
+  idPosx = logGetVarId("stateEstimate", "posx");
+  idPosy = logGetVarId("stateEstimate", "posy");
+  idPosz = logGetVarId("stateEstimate", "posz");
+  idVelBodyX = logGetVarId("stateEstimate", "velBodyX");
+  idVelBodyY = logGetVarId("stateEstimate", "velBodyY");
+  idVelBodyZ = logGetVarId("stateEstimate", "velBodyZ");
+  idOrientationRoll = logGetVarId("stateEstimate", "roll");
+  idOrientationPitch = logGetVarId("stateEstimate", "pitch");
+  idOrientationYaw = logGetVarId("stateEstimate", "yaw");
+    
   idGyroX = logGetVarId("gyro", "x");
   idGyroY = logGetVarId("gyro", "y");
   idGyroZ = logGetVarId("gyro", "z");
-  idAccX = logGetVarId("acc", "x");
-  idAccY = logGetVarId("acc", "y");
-  idAccZ = logGetVarId("acc", "z");
-  idThrust = logGetVarId("controller", "actuatorThrust");
-  idControllerRoll = logGetVarId("controller", "roll");
-  idControllerPitch = logGetVarId("controller", "pitch");
-  idControllerRollRate = logGetVarId("controller", "rollRate");
-  idControllerPitchRate = logGetVarId("controller", "pitchRate");
-  idControllerYawRate = logGetVarId("controller", "yawRate");
-  idSnnType = paramGetVarId("pid_rate", "snnType");
-  idStateEstimateRoll = logGetVarId("stateEstimate", "roll");
-  idStateEstimatePitch = logGetVarId("stateEstimate", "pitch");
+//   idAccX = logGetVarId("acc", "x");
+//   idAccY = logGetVarId("acc", "y");
+//   idAccZ = logGetVarId("acc", "z");
+//   idThrust = logGetVarId("controller", "actuatorThrust");
+//   idControllerRoll = logGetVarId("controller", "roll");
+//   idControllerPitch = logGetVarId("controller", "pitch");
+//   idControllerRollRate = logGetVarId("controller", "rollRate");
+//   idControllerPitchRate = logGetVarId("controller", "pitchRate");
+//   idControllerYawRate = logGetVarId("controller", "yawRate");
+//   idSnnType = paramGetVarId("pid_rate", "snnType");
+//   idStateEstimateRoll = logGetVarId("stateEstimate", "roll");
+//   idStateEstimatePitch = logGetVarId("stateEstimate", "pitch");
 
   xTaskCreate(teensyTask, TEENSY_TASK_NAME, TEENSY_TASK_STACKSIZE, NULL, TEENSY_TASK_PRI, NULL);
 
@@ -264,7 +288,7 @@ void teensyTask(void* arg)
         uint32_t after = T2M(xTaskGetTickCount());
         receiving_outer = receiving_outer + (after - now_ms);
     } else {
-        vTaskDelayUntil(&xLastWakeTime, F2T(500));
+        vTaskDelayUntil(&xLastWakeTime, F2T(100));
         sending = true;
     }
     // Printing the amount of received messages over the last seconds
@@ -280,24 +304,19 @@ void teensyTask(void* arg)
   }
 }
 
-int16_t teensyGetRollTorque(void) {
-    return myserial_control_out.torque_x;
+int16_t teensyGetMotor1(void) {
+    return myserial_control_out.motor_1;
 }
 
-int16_t teensyGetPitchTorque(void) {
-    return myserial_control_out.torque_y;
+int16_t teensyGetMotor2(void) {
+    return myserial_control_out.motor_2;
 }
 
-int16_t teensyGetYawTorque(void) {
-    return myserial_control_out.torque_z;
+int16_t teensyGetMotor3(void) {
+    return myserial_control_out.motor_3;
 }
-
-int16_t teensyGetRollInteg(void) {
-    return myserial_control_out.x_integ;
-}
-
-int16_t teensyGetPitchInteg(void) {
-    return myserial_control_out.y_integ;
+int16_t teensyGetMotor4(void) {
+    return myserial_control_out.motor_4;
 }
 
 bool teensyGetStatus(void) {
@@ -324,38 +343,49 @@ DECK_DRIVER(teensy_deck);
  */
 LOG_GROUP_START(snn_control)
 /**
- * @brief SNN control roll torque
+ * @brief SNN control motor output 1 to 4
  */
-LOG_ADD(LOG_INT16, torque_roll, &myserial_control_out.torque_x)
-/**
- * @brief SNN control pitch torque
- */
-LOG_ADD(LOG_INT16, torque_pitch, &myserial_control_out.torque_y)
-/**
- * @brief SNN control yaw torque
- */
-LOG_ADD(LOG_INT16, torque_yaw, &myserial_control_out.torque_z)
-/**
- * @brief SNN control roll input
- */
-LOG_ADD(LOG_FLOAT, roll_input, &myserial_control_in.roll)
-/**
- * @brief SNN control pitch input
- */
-LOG_ADD(LOG_FLOAT, pitch_input, &myserial_control_in.pitch)
+LOG_ADD(LOG_INT16, motor1, &myserial_control_out.motor_1)
+LOG_ADD(LOG_INT16, motor2, &myserial_control_out.motor_2)
+LOG_ADD(LOG_INT16, motor3, &myserial_control_out.motor_3)
+LOG_ADD(LOG_INT16, motor4, &myserial_control_out.motor_4)
+
 /**
  * @brief SNN control status
  */
 LOG_ADD(LOG_UINT8, status, &status)
 /**
- * @brief SNN control roll torque integral
+ * @brief SNN inputs
  */
-LOG_ADD(LOG_INT16, roll_integ, &myserial_control_out.x_integ)
-/**
- * @brief SNN control pitch torque integral
- */
-LOG_ADD(LOG_INT16, pitch_integ, &myserial_control_out.y_integ)
+LOG_ADD(LOG_INT16, posx, &posx)
+LOG_ADD(LOG_INT16, posy, &posy)
+LOG_ADD(LOG_INT16, posz, &posz)
+LOG_ADD(LOG_FLOAT, velBodyX, &velBodyX)
+LOG_ADD(LOG_FLOAT, velBodyY, &velBodyY)
+LOG_ADD(LOG_FLOAT, velBodyZ, &velBodyZ)
+LOG_ADD(LOG_FLOAT, orientationRoll, &orientationRoll)
+LOG_ADD(LOG_FLOAT, orientationPitch, &orientationPitch)
+LOG_ADD(LOG_FLOAT, orientationYaw, &orientationYaw)
+LOG_ADD(LOG_FLOAT, gyroX, &gyroX)
+LOG_ADD(LOG_FLOAT, gyroY, &gyroY)
+LOG_ADD(LOG_FLOAT, gyroZ, &gyroZ) 
 LOG_GROUP_STOP(snn_control)
+
+/**
+ * Logging variables for the IMU
+ */
+LOG_GROUP_START(imu)
+/**
+ * @brief IMU readings
+ */
+LOG_ADD(LOG_FLOAT, accX, &accX)
+LOG_ADD(LOG_FLOAT, accY, &accY)
+LOG_ADD(LOG_FLOAT, accZ, &accZ)
+LOG_ADD(LOG_FLOAT, gyroX, &gyroX)
+LOG_ADD(LOG_FLOAT, gyroY, &gyroY)
+LOG_ADD(LOG_FLOAT, gyroZ, &gyroZ)
+
+LOG_GROUP_STOP(imu)
 
 PARAM_GROUP_START(deck)
 
