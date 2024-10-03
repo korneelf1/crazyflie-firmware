@@ -32,24 +32,19 @@
 /**
 EXPECTED BY TEENSY CODE
 /**
-void setInputMessage(void) {
-  inputs[0] = myserial_control_in.pos_x;
-  inputs[1] = myserial_control_in.pos_y;
-  inputs[2] = myserial_control_in.pos_z;
-  inputs[3] = myserial_control_in.vel_body_x;
-  inputs[4] = myserial_control_in.vel_body_y;
-  inputs[5] = myserial_control_in.vel_body_z;
-  inputs[6] = myserial_control_in.roll;
-  inputs[7] = myserial_control_in.pitch;
-  inputs[8] = myserial_control_in.yaw;
-  inputs[9] = myserial_control_in.gyro_x;
-  inputs[10] = myserial_control_in.gyro_y;
-  inputs[11] = myserial_control_in.gyro_z;
-
-  // inputs = [gyro_x, gyro_y, gyro_z, acc_x, acc_y, acc_z, roll_target, pitch_target];
-  // DEBUG_serial.printf("%f, %f, %f, %f, %f, %f, %f, %f\n", inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6], inputs[7]);
-  set_network_input(&controller, inputs);
-}
+  inputs[0]  = myserial_control_in.pos_x;
+  inputs[1]  = myserial_control_in.pos_y;
+  inputs[2]  = myserial_control_in.pos_z;
+  inputs[3]  = myserial_control_in.vel_body_x;
+  inputs[4]  = myserial_control_in.vel_body_y;
+  inputs[5]  = myserial_control_in.vel_body_z;
+  inputs[6]  = myserial_control_in.quat_w;
+  inputs[7]  = myserial_control_in.quat_x;
+  inputs[8]  = myserial_control_in.quat_y;
+  inputs[9]  = myserial_control_in.quat_z;
+  inputs[10] = myserial_control_in.gyro_x;
+  inputs[11] = myserial_control_in.gyro_y;
+  inputs[12] = myserial_control_in.gyro_z;
 
 void setOutputMessage(void) {
   myserial_control_out.motor_1 = saturateSignedInt16(controller.out[0]);
@@ -67,9 +62,10 @@ struct __attribute__((__packed__)) serial_control_in {
     float vel_body_y;
     float vel_body_z;
     //attitude
-    float roll;
-    float pitch;
-    float yaw;
+    float quat_w;
+    float quat_x;
+    float quat_y;
+    float quat_z;
     //gyro
     float gyro_x;
     float gyro_y;
@@ -78,6 +74,30 @@ struct __attribute__((__packed__)) serial_control_in {
     //CHECKSUM
     uint8_t checksum_in;
 };
+
+struct __attribute__((__packed__)) target_state {
+    //position
+    float pos_x;
+    float pos_y;
+    float pos_z;
+    //velocity
+    float vel_body_x;
+    float vel_body_y;
+    float vel_body_z;
+    //attitude
+    float quat_w;
+    float quat_x;
+    float quat_y;
+    float quat_z;
+    //gyro
+    float gyro_x;
+    float gyro_y;
+    float gyro_z;
+
+    //CHECKSUM
+    uint8_t checksum_in;
+};
+
 
 struct __attribute__((__packed__)) serial_control_out {
     //motor commands
@@ -94,6 +114,7 @@ void teensyInit(DeckInfo* info);
 bool teensyTest(void);
 void teensyTask(void* arg);
 
+void setTargetState(float* state);  //set the target state for the teensy
 extern bool teensyGetStatus(void);
 extern int16_t teensyGetMotor1(void);
 extern int16_t teensyGetMotor2(void);

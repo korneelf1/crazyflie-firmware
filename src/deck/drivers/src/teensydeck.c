@@ -51,6 +51,7 @@ bool status = false;
 
 struct serial_control_in myserial_control_in;
 struct serial_control_out myserial_control_out;
+struct target_state mytarget_state;
 uint8_t serial_cf_msg_buf_out[ 2*sizeof(struct serial_control_out) ] = {0};
 uint16_t serial_cf_buf_out_cnt = 0;
 int serial_cf_received_packets = 0;
@@ -66,8 +67,8 @@ int set_control_outer = 0;
 logVarId_t idPosx, idPosy, idPosz, idVelBodyX, idVelBodyY, idVelBodyZ;
 float posx, posy, posz, velBodyX, velBodyY, velBodyZ;
 
-logvarID_t idOrientationRoll, idOrientationPitch, idOrientationYaw;
-float orientationRoll, orientationPitch, orientationYaw;
+logvarID_t idQuatw, idQuatx, idQuaty, idQuatz;
+float quatw, quatx, quaty, quatz;
 logVarId_t idGyroX, idGyroY, idGyroZ, idAccX, idAccY, idAccZ;
 float gyroX, gyroY, gyroZ, accX, accY, accZ;
 logVarId_t idMotor1, idMotor2, idMotor3, idMotor4;
@@ -86,69 +87,52 @@ void serialParseMessageOut(void)
 
 void setControlInMessage(void) 
 {
-    // Get roll input values and put them in the message
-    gyroX = logGetFloat(idGyroX);
-    gyroY = logGetFloat(idGyroY);
-    gyroZ = logGetFloat(idGyroZ);
-    accX = logGetFloat(idAccX);
-    accY = logGetFloat(idAccY);
-    accZ = logGetFloat(idAccZ);
     posx = logGetFloat(idPosx);
     posy = logGetFloat(idPosy);
     posz = logGetFloat(idPosz);
     velBodyX = logGetFloat(idVelBodyX);
     velBodyY = logGetFloat(idVelBodyY);
     velBodyZ = logGetFloat(idVelBodyZ);
-    orientationRoll = logGetFloat(idOrientationRoll);
-    orientationPitch = logGetFloat(idOrientationPitch);
-    orientationYaw = logGetFloat(idOrientationYaw);
-    
-    // snnType = paramGetInt(idSnnType);
+    quatw = logGetFloat(idQuatw);
+    quatx = logGetFloat(idQuatx);
+    quaty = logGetFloat(idQuaty);
+    quatz = logGetFloat(idQuatz);
+    gyroX = logGetFloat(idGyroX);
+    gyroY = logGetFloat(idGyroY);
+    gyroZ = logGetFloat(idGyroZ);
 
-    // if ((snnType == 0) || (snnType == 1) || (snnType == 3)){
-    //     controllerRoll = logGetFloat(idControllerRoll);
-    //     controllerPitch = logGetFloat(idControllerPitch);
-    //     controllerYawRate = logGetFloat(idControllerYawRate);
-    // } 
-    // if (snnType == 2) {
-    //     controllerRollRate = logGetFloat(idControllerRollRate);
-    //     controllerPitchRate = logGetFloat(idControllerPitchRate);
-    //     controllerYawRate = logGetFloat(idControllerYawRate);
-    // }
-    // if (snnType == 3) { 
-    //     stateEstimateRoll = logGetFloat(idStateEstimateRoll);
-    //     stateEstimatePitch = logGetFloat(idStateEstimatePitch);
-    // }
-
-    myserial_control_in.pos_x = pos_x;
-    myserial_control_in.pos_y = pos_y;
-    myserial_control_in.pos_z = pos_z;
+    myserial_control_in.pos_x = posx;
+    myserial_control_in.pos_y = posy;
+    myserial_control_in.pos_z = posz;
     myserial_control_in.vel_body_x = velBodyX;
     myserial_control_in.vel_body_y = velBodyY;
     myserial_control_in.vel_body_z = velBodyZ;
+    myserial_control_in.quat_w = quatw;
+    myserial_control_in.quat_x = quatx;
+    myserial_control_in.quat_y = quaty;
+    myserial_control_in.quat_z = quatz;
     myserial_control_in.gyro_x = gyroX;
     myserial_control_in.gyro_y = gyroY;
     myserial_control_in.gyro_z = gyroZ;
-    myserial_control_in.roll = orientationRoll;
-    myserial_control_in.pitch = orientationPitch;
-    myserial_control_in.yaw = orientationYaw;
 
-    // if ((snnType == 0) || (snnType == 1) || (snnType == 3) ){
-    //     myserial_control_in.roll = controllerRoll;
-    //     myserial_control_in.pitch = controllerPitch;
-    //     myserial_control_in.yaw = controllerYawRate;
-    // } 
-    // if (snnType == 2) {
-    //     myserial_control_in.roll = controllerRollRate;
-    //     myserial_control_in.pitch = controllerPitchRate;
-    //     myserial_control_in.yaw = controllerYawRate;
-    // }
-    // if (snnType == 3) {
-    //     myserial_control_in.x_acc = stateEstimatePitch;
-    //     myserial_control_in.y_acc = stateEstimateRoll;
-    // }
 }
 
+void setTargetState(float* state) 
+{
+    target_state.pos_x = state[0];
+    target_state.pos_y = state[1];
+    target_state.pos_z = state[2];
+    target_state.vel_body_x = state[3];
+    target_state.vel_body_y = state[4];
+    target_state.vel_body_z = state[5];
+    target_state.quat_w = state[6];
+    target_state.quat_x = state[7];
+    target_state.quat_y = state[8];
+    target_state.quat_z = state[9];
+    target_state.gyro_x = state[10];
+    target_state.gyro_y = state[11];
+    target_state.gyro_z = state[12];
+}
 // Read a control out message over uart
 void uartReadControlOutMessage(void) 
 {
@@ -222,31 +206,20 @@ void teensyInit(DeckInfo* info)
 
 
   // get the logVarIds that are used to get the state/target info
-  idPosx = logGetVarId("stateEstimate", "posx");
-  idPosy = logGetVarId("stateEstimate", "posy");
-  idPosz = logGetVarId("stateEstimate", "posz");
-  idVelBodyX = logGetVarId("stateEstimate", "velBodyX");
-  idVelBodyY = logGetVarId("stateEstimate", "velBodyY");
-  idVelBodyZ = logGetVarId("stateEstimate", "velBodyZ");
-  idOrientationRoll = logGetVarId("stateEstimate", "roll");
-  idOrientationPitch = logGetVarId("stateEstimate", "pitch");
-  idOrientationYaw = logGetVarId("stateEstimate", "yaw");
+  idPosx = logGetVarId("state_input", "x");
+  idPosy = logGetVarId("state_input", "y");
+  idPosz = logGetVarId("state_input", "z");
+  idVelBodyX = logGetVarId("state_input", "vx");
+  idVelBodyY = logGetVarId("state_input", "vy");
+  idVelBodyZ = logGetVarId("state_input", "vz");
+  idQuatw = logGetVarId("state_input", "qw");
+  idQuatx = logGetVarId("state_input", "qx");
+  idQuaty = logGetVarId("state_input", "qy");
+  idQuatz = logGetVarId("state_input", "qz");
     
-  idGyroX = logGetVarId("gyro", "x");
-  idGyroY = logGetVarId("gyro", "y");
-  idGyroZ = logGetVarId("gyro", "z");
-//   idAccX = logGetVarId("acc", "x");
-//   idAccY = logGetVarId("acc", "y");
-//   idAccZ = logGetVarId("acc", "z");
-//   idThrust = logGetVarId("controller", "actuatorThrust");
-//   idControllerRoll = logGetVarId("controller", "roll");
-//   idControllerPitch = logGetVarId("controller", "pitch");
-//   idControllerRollRate = logGetVarId("controller", "rollRate");
-//   idControllerPitchRate = logGetVarId("controller", "pitchRate");
-//   idControllerYawRate = logGetVarId("controller", "yawRate");
-//   idSnnType = paramGetVarId("pid_rate", "snnType");
-//   idStateEstimateRoll = logGetVarId("stateEstimate", "roll");
-//   idStateEstimatePitch = logGetVarId("stateEstimate", "pitch");
+  idGyroX = logGetVarId("state_input", "wx");
+  idGyroY = logGetVarId("state_input", "wy");
+  idGyroZ = logGetVarId("state_input", "wz");
 
   xTaskCreate(teensyTask, TEENSY_TASK_NAME, TEENSY_TASK_STACKSIZE, NULL, TEENSY_TASK_PRI, NULL);
 
