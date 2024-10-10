@@ -434,68 +434,68 @@ PARAM_GROUP_STOP(stabilizer)
  *
  * Note: all members may not be updated depending on how the system is used
  */
-PARAM_GROUP_START(ctrltarget)
+LOG_GROUP_START(ctrltarget)
 
 /**
  * @brief Desired position X [m]
  */
-PARAM_ADD_CORE(PARAM_UINT8, x, &setpoint.position.x)
+LOG_ADD(LOG_FLOAT, x, &setpoint.position.x)
 
 /**
  * @brief Desired position Y [m]
  */
-PARAM_ADD_CORE(PARAM_UINT8, y, &setpoint.position.y)
+LOG_ADD(LOG_FLOAT, y, &setpoint.position.y)
 
 /**
  * @brief Desired position X [m]
  */
-PARAM_ADD_CORE(PARAM_UINT8, z, &setpoint.position.z)
+LOG_ADD(LOG_FLOAT, z, &setpoint.position.z)
 
 /**
  * @brief Desired velocity X [m/s]
  */
-PARAM_ADD_CORE(PARAM_UINT8, vx, &setpoint.velocity.x)
+LOG_ADD(LOG_FLOAT, vx, &setpoint.velocity.x)
 
 /**
  * @brief Desired velocity Y [m/s]
  */
-PARAM_ADD_CORE(PARAM_UINT8, vy, &setpoint.velocity.y)
+LOG_ADD(LOG_FLOAT, vy, &setpoint.velocity.y)
 
 /**
  * @brief Desired velocity Z [m/s]
  */
-PARAM_ADD_CORE(PARAM_UINT8, vz, &setpoint.velocity.z)
+LOG_ADD(LOG_FLOAT, vz, &setpoint.velocity.z)
 
 /**
  * @brief Desired acceleration X [m/s^2]
  */
-PARAM_ADD_CORE(PARAM_UINT8, ax, &setpoint.acceleration.x)
+LOG_ADD(LOG_FLOAT, ax, &setpoint.acceleration.x)
 
 /**
  * @brief Desired acceleration Y [m/s^2]
  */
-PARAM_ADD_CORE(PARAM_UINT8, ay, &setpoint.acceleration.y)
+LOG_ADD(LOG_FLOAT, ay, &setpoint.acceleration.y)
 
 /**
  * @brief Desired acceleration Z [m/s^2]
  */
-PARAM_ADD_CORE(PARAM_UINT8, az, &setpoint.acceleration.z)
+LOG_ADD(LOG_FLOAT, az, &setpoint.acceleration.z)
 
 /**
  * @brief Desired attitude, roll [deg]
  */
-PARAM_ADD_CORE(PARAM_UINT8,roll, &setpoint.attitude.roll)
+LOG_ADD(LOG_FLOAT,roll, &setpoint.attitude.roll)
 
 /**
  * @brief Desired attitude, pitch [deg]
  */
-PARAM_ADD_CORE(PARAM_UINT8, pitch, &setpoint.attitude.pitch)
+LOG_ADD(LOG_FLOAT, pitch, &setpoint.attitude.pitch)
 
 /**
  * @brief Desired attitude rate, yaw rate [deg/s]
  */
-PARAM_ADD_CORE(PARAM_UINT8,yaw, &setpoint.attitudeRate.yaw)
-PARAM_GROUP_STOP(ctrltarget)
+LOG_ADD(LOG_FLOAT,yaw, &setpoint.attitudeRate.yaw)
+LOG_GROUP_STOP(ctrltarget)
 
 /**
  * Log group for the current controller target, compressed format.
