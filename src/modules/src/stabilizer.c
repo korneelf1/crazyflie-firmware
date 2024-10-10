@@ -57,9 +57,13 @@
 #include "static_mem.h"
 #include "rateSupervisor.h"
 
+#include "teensydeck.h"
+
+
 static bool isInit;
 static bool emergencyStop = false;
 static int emergencyStopTimeout = EMERGENCY_STOP_TIMEOUT_DISABLED;
+static bool useSNN;
 
 static uint32_t inToOutLatency;
 
@@ -215,6 +219,28 @@ static void checkEmergencyStopTimeout()
   }
 }
 
+bool sates_within_bounds(state_t* state, sensorData_t* sensorData) {
+  if (state->velocity.x > 3.0f || state->velocity.x < -3.0f) {
+    return false;
+  }
+  if (state->velocity.y > 3.0f || state->velocity.y < -3.0f) {
+    return false;
+  }
+  if (state->velocity.z > 3.0f || state->velocity.z < -3.0f) {
+    return false;
+  }
+  if (sensorData->gyro.x > 90.0f || sensorData->gyro.x < -90.0f) {
+    return false;
+  }
+  if (sensorData->gyro.y > 90.0f || sensorData->gyro.y < -90.0f) {
+    return false;
+  }
+  if (sensorData->gyro.z > 90.0f || sensorData->gyro.z < -90.0f) {
+    return false;
+  }
+  return true;
+}
+
 static void batteryCompensation(const motors_thrust_uncapped_t* motorThrustUncapped, motors_thrust_uncapped_t* motorThrustBatCompUncapped)
 {
   float supplyVoltage = pmGetBatteryVoltage();
@@ -308,8 +334,36 @@ static void stabilizerTask(void* param)
       } else {
         powerDistribution(&control, &motorThrustUncapped);
         batteryCompensation(&motorThrustUncapped, &motorThrustBatCompUncapped);
-        powerDistributionCap(&motorThrustBatCompUncapped, &motorPwm);
-        setMotorRatios(&motorPwm);
+        if (useSNN && sates_within_bounds(&state, &sensorData)) {
+          DEBUG_PRINT("USING SNN TO HOVER\n");
+          
+          motorPwm.motors.m1 = (teensyGetMotor1()+1.0f/2.0f)*UINT16_MAX;
+          motorPwm.motors.m2 = (teensyGetMotor2()+1.0f/2.0f)*UINT16_MAX;
+          motorPwm.motors.m3 = (teensyGetMotor3()+1.0f/2.0f)*UINT16_MAX;
+          motorPwm.motors.m4 = (teensyGetMotor4()+1.0f/2.0f)*UINT16_MAX;
+          setMotorRatios(&motorPwm);
+          DEBUG_PRINT("Motor 1: %f\n", (double)(teensyGetMotor1()));
+          DEBUG_PRINT("Motor 2: %f\n", (double)(teensyGetMotor2()));
+          DEBUG_PRINT("Motor 3: %f\n", (double)(teensyGetMotor3() ));
+          DEBUG_PRINT("Motor 4: %f\n", (double)(teensyGetMotor4() ));
+
+          } else {
+          // DEBUG_PRINT("USING DEFAULT CONTROLLER\n");
+          DEBUG_PRINT("Motor 1: %f\n", (double)(teensyGetMotor1() + 1.0f / 2.0f));
+          DEBUG_PRINT("Motor 1 Default: %f\n", (double)(motorThrustBatCompUncapped.list[0] ));
+
+          DEBUG_PRINT("Motor 2: %f\n", (double)(teensyGetMotor2() + 1.0f / 2.0f));
+          DEBUG_PRINT("Motor 2 Default: %f\n", (double)(motorThrustBatCompUncapped.list[1] ));
+          DEBUG_PRINT("Motor 3: %f\n", (double)(teensyGetMotor3() + 1.0f / 2.0f));
+          DEBUG_PRINT("Motor 3 Default: %f\n", (double)(motorThrustBatCompUncapped.list[2] ));
+          DEBUG_PRINT("Motor 4: %f\n", (double)(teensyGetMotor4() + 1.0f / 2.0f));
+          DEBUG_PRINT("Motor 4 Default: %f\n", (double)(motorThrustBatCompUncapped.list[3] ));
+          
+          powerDistributionCap(&motorThrustBatCompUncapped, &motorPwm);
+
+          setMotorRatios(&motorPwm);
+          }
+        
       }
 
 #ifdef CONFIG_DECK_USD
@@ -380,68 +434,68 @@ PARAM_GROUP_STOP(stabilizer)
  *
  * Note: all members may not be updated depending on how the system is used
  */
-LOG_GROUP_START(ctrltarget)
+PARAM_GROUP_START(ctrltarget)
 
 /**
  * @brief Desired position X [m]
  */
-LOG_ADD_CORE(LOG_FLOAT, x, &setpoint.position.x)
+PARAM_ADD_CORE(PARAM_UINT8, x, &setpoint.position.x)
 
 /**
  * @brief Desired position Y [m]
  */
-LOG_ADD_CORE(LOG_FLOAT, y, &setpoint.position.y)
+PARAM_ADD_CORE(PARAM_UINT8, y, &setpoint.position.y)
 
 /**
  * @brief Desired position X [m]
  */
-LOG_ADD_CORE(LOG_FLOAT, z, &setpoint.position.z)
+PARAM_ADD_CORE(PARAM_UINT8, z, &setpoint.position.z)
 
 /**
  * @brief Desired velocity X [m/s]
  */
-LOG_ADD_CORE(LOG_FLOAT, vx, &setpoint.velocity.x)
+PARAM_ADD_CORE(PARAM_UINT8, vx, &setpoint.velocity.x)
 
 /**
  * @brief Desired velocity Y [m/s]
  */
-LOG_ADD_CORE(LOG_FLOAT, vy, &setpoint.velocity.y)
+PARAM_ADD_CORE(PARAM_UINT8, vy, &setpoint.velocity.y)
 
 /**
  * @brief Desired velocity Z [m/s]
  */
-LOG_ADD_CORE(LOG_FLOAT, vz, &setpoint.velocity.z)
+PARAM_ADD_CORE(PARAM_UINT8, vz, &setpoint.velocity.z)
 
 /**
  * @brief Desired acceleration X [m/s^2]
  */
-LOG_ADD_CORE(LOG_FLOAT, ax, &setpoint.acceleration.x)
+PARAM_ADD_CORE(PARAM_UINT8, ax, &setpoint.acceleration.x)
 
 /**
  * @brief Desired acceleration Y [m/s^2]
  */
-LOG_ADD_CORE(LOG_FLOAT, ay, &setpoint.acceleration.y)
+PARAM_ADD_CORE(PARAM_UINT8, ay, &setpoint.acceleration.y)
 
 /**
  * @brief Desired acceleration Z [m/s^2]
  */
-LOG_ADD_CORE(LOG_FLOAT, az, &setpoint.acceleration.z)
+PARAM_ADD_CORE(PARAM_UINT8, az, &setpoint.acceleration.z)
 
 /**
  * @brief Desired attitude, roll [deg]
  */
-LOG_ADD_CORE(LOG_FLOAT, roll, &setpoint.attitude.roll)
+PARAM_ADD_CORE(PARAM_UINT8,roll, &setpoint.attitude.roll)
 
 /**
  * @brief Desired attitude, pitch [deg]
  */
-LOG_ADD_CORE(LOG_FLOAT, pitch, &setpoint.attitude.pitch)
+PARAM_ADD_CORE(PARAM_UINT8, pitch, &setpoint.attitude.pitch)
 
 /**
  * @brief Desired attitude rate, yaw rate [deg/s]
  */
-LOG_ADD_CORE(LOG_FLOAT, yaw, &setpoint.attitudeRate.yaw)
-LOG_GROUP_STOP(ctrltarget)
+PARAM_ADD_CORE(PARAM_UINT8,yaw, &setpoint.attitudeRate.yaw)
+PARAM_GROUP_STOP(ctrltarget)
 
 /**
  * Log group for the current controller target, compressed format.
@@ -816,6 +870,14 @@ LOG_ADD(LOG_INT16, ratePitch, &stateCompressed.ratePitch)
 LOG_ADD(LOG_INT16, rateYaw, &stateCompressed.rateYaw)
 LOG_GROUP_STOP(stateEstimateZ)
 
+LOG_GROUP_START(og_ctrl)
+// add motorThrustUncapped
+LOG_ADD(LOG_INT32, m1, &motorThrustUncapped.list[0])
+LOG_ADD(LOG_INT32, m2, &motorThrustUncapped.list[1])
+LOG_ADD(LOG_INT32, m3, &motorThrustUncapped.list[2])
+LOG_ADD(LOG_INT32, m4, &motorThrustUncapped.list[3])
+LOG_GROUP_STOP(og_ctrl)
+
 
 LOG_GROUP_START(motor)
 
@@ -843,3 +905,8 @@ LOG_ADD(LOG_INT32, m3req, &motorThrustBatCompUncapped.motors.m3)
  */
 LOG_ADD(LOG_INT32, m4req, &motorThrustBatCompUncapped.motors.m4)
 LOG_GROUP_STOP(motor)
+
+
+PARAM_GROUP_START(snn_motor_control)
+PARAM_ADD(PARAM_UINT8, use_snn, &useSNN)
+PARAM_GROUP_STOP(snn_motor_control)

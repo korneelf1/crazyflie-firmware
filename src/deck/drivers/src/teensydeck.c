@@ -66,13 +66,14 @@ int set_control_outer = 0;
 /////////////INTERNAL LOG VARIABLES
 logVarId_t idPosx, idPosy, idPosz, idVelBodyX, idVelBodyY, idVelBodyZ;
 float posx, posy, posz, velBodyX, velBodyY, velBodyZ;
-
-logVarId_t idQuatw, idQuatx, idQuaty, idQuatz;
-float quatw, quatx, quaty, quatz;
+logVarId_t idPosx_target, idPosy_target, idPosz_target;
+float posx_target, posy_target, posz_target;
+logVarId_t idQw, idQx, idQy, idQz;
+float qw,qx,qy,qz, orient_1, orient_2, orient_3, orient_4, orient_5, orient_6, orient_7, orient_8, orient_9;
 logVarId_t idGyroX, idGyroY, idGyroZ, idAccX, idAccY, idAccZ;
 float gyroX, gyroY, gyroZ, accX, accY, accZ;
 logVarId_t idMotor1, idMotor2, idMotor3, idMotor4;
-int motor1, motor2, motor3, motor4;
+float motor1, motor2, motor3, motor4;
 
 paramVarId_t idSnnType;
 int snnType;
@@ -93,27 +94,64 @@ void setControlInMessage(void)
     velBodyX = logGetFloat(idVelBodyX);
     velBodyY = logGetFloat(idVelBodyY);
     velBodyZ = logGetFloat(idVelBodyZ);
-    quatw = logGetFloat(idQuatw);
-    quatx = logGetFloat(idQuatx);
-    quaty = logGetFloat(idQuaty);
-    quatz = logGetFloat(idQuatz);
+    qw = logGetFloat(idQw);
+    qx = logGetFloat(idQx);
+    qy = logGetFloat(idQy);
+    qz = logGetFloat(idQz);
+
+    //     rlt::set(observation, 0,  3 + 0, (1 - 2*qy*qy - 2*qz*qz));
+    // rlt::set(observation, 0,  3 + 1, (    2*qx*qy - 2*qw*qz));
+    // rlt::set(observation, 0,  3 + 2, (    2*qx*qz + 2*qw*qy));
+    // rlt::set(observation, 0,  3 + 3, (    2*qx*qy + 2*qw*qz));
+    // rlt::set(observation, 0,  3 + 4, (1 - 2*qx*qx - 2*qz*qz));
+    // rlt::set(observation, 0,  3 + 5, (    2*qy*qz - 2*qw*qx));
+    // rlt::set(observation, 0,  3 + 6, (    2*qx*qz - 2*qw*qy));
+    // rlt::set(observation, 0,  3 + 7, (    2*qy*qz + 2*qw*qx));
+    // rlt::set(observation, 0,  3 + 8, (1 - 2*qx*qx - 2*qy*qy));
+    orient_1 = 1 - 2*qy*qy - 2*qz*qz;
+    orient_2 = 2*qx*qy - 2*qw*qz;
+    orient_3 = 2*qx*qz + 2*qw*qy;
+    orient_4 = 2*qx*qy + 2*qw*qz;
+    orient_5 = 1 - 2*qx*qx - 2*qz*qz;
+    orient_6 = 2*qy*qz - 2*qw*qx;
+    orient_7 = 2*qx*qz - 2*qw*qy;
+    orient_8 = 2*qy*qz + 2*qw*qx;
+    orient_9 = 1 - 2*qx*qx - 2*qy*qy;
+
     gyroX = logGetFloat(idGyroX);
     gyroY = logGetFloat(idGyroY);
     gyroZ = logGetFloat(idGyroZ);
+    posx_target = logGetFloat(idPosx_target);
+    posy_target = logGetFloat(idPosy_target);
+    posz_target = logGetFloat(idPosz_target);
 
-    myserial_control_in.pos_x = posx;
-    myserial_control_in.pos_y = posy;
-    myserial_control_in.pos_z = posz;
-    myserial_control_in.vel_body_x = velBodyX;
-    myserial_control_in.vel_body_y = velBodyY;
-    myserial_control_in.vel_body_z = velBodyZ;
-    myserial_control_in.quat_w = quatw;
-    myserial_control_in.quat_x = quatx;
-    myserial_control_in.quat_y = quaty;
-    myserial_control_in.quat_z = quatz;
+    snnType = paramGetInt(idSnnType);
+    if (snnType == 1) {
+        myserial_control_in.pos_x = posx-posx_target;
+        myserial_control_in.pos_y = posy-posy_target;
+        myserial_control_in.pos_z = posz-posz_target;
+    } else {
+        myserial_control_in.pos_x = 0;
+        myserial_control_in.pos_y = 0;
+        myserial_control_in.pos_z = 0;
+    }
+
+    myserial_control_in.vel_x = velBodyX;
+    myserial_control_in.vel_y = velBodyY;
+    myserial_control_in.vel_z = velBodyZ;
+    myserial_control_in.orient_1 = orient_1;
+    myserial_control_in.orient_2 = orient_2;
+    myserial_control_in.orient_3 = orient_3;
+    myserial_control_in.orient_4 = orient_4;
+    myserial_control_in.orient_5 = orient_5;
+    myserial_control_in.orient_6 = orient_6;
+    myserial_control_in.orient_7 = orient_7;
+    myserial_control_in.orient_8 = orient_8;
+    myserial_control_in.orient_9 = orient_9;
     myserial_control_in.gyro_x = gyroX;
     myserial_control_in.gyro_y = gyroY;
     myserial_control_in.gyro_z = gyroZ;
+    myserial_control_in.type = snnType;
 
 }
 
@@ -122,9 +160,9 @@ void setControlInMessage(void)
 //     target_state.pos_x = state[0];
 //     target_state.pos_y = state[1];
 //     target_state.pos_z = state[2];
-//     target_state.vel_body_x = state[3];
-//     target_state.vel_body_y = state[4];
-//     target_state.vel_body_z = state[5];
+//     target_state.vel_x = state[3];
+//     target_state.vel_y = state[4];
+//     target_state.vel_z = state[5];
 //     target_state.quat_w = state[6];
 //     target_state.quat_x = state[7];
 //     target_state.quat_y = state[8];
@@ -168,6 +206,8 @@ void uartReadControlOutMessage(void)
         }
         else {
             DEBUG_PRINT("Incorrect message\n");
+            DEBUG_PRINT("Checksum: %d\n", checksum_in_local);
+            DEBUG_PRINT("Message: %d\n", serial_cf_msg_buf_out[sizeof(struct serial_control_out)]);
         }
         // receiving done; set to false
         receiving = false;
@@ -206,20 +246,23 @@ void teensyInit(DeckInfo* info)
 
 
   // get the logVarIds that are used to get the state/target info
-  idPosx = logGetVarId("state_input", "x");
-  idPosy = logGetVarId("state_input", "y");
-  idPosz = logGetVarId("state_input", "z");
-  idVelBodyX = logGetVarId("state_input", "vx");
-  idVelBodyY = logGetVarId("state_input", "vy");
-  idVelBodyZ = logGetVarId("state_input", "vz");
-  idQuatw = logGetVarId("state_input", "qw");
-  idQuatx = logGetVarId("state_input", "qx");
-  idQuaty = logGetVarId("state_input", "qy");
-  idQuatz = logGetVarId("state_input", "qz");
-    
-  idGyroX = logGetVarId("state_input", "wx");
-  idGyroY = logGetVarId("state_input", "wy");
-  idGyroZ = logGetVarId("state_input", "wz");
+  idPosx = logGetVarId("stateEstimate", "x");
+  idPosy = logGetVarId("stateEstimate", "y");
+  idPosz = logGetVarId("stateEstimate", "z");
+  idPosx_target = logGetVarId("ctrltarget", "x");
+  idPosy_target = logGetVarId("ctrltarget", "y");
+  idPosz_target = logGetVarId("ctrltarget", "z");
+  idVelBodyX = logGetVarId("stateEstimate", "vx");
+  idVelBodyY = logGetVarId("stateEstimate", "vy");
+  idVelBodyZ = logGetVarId("stateEstimate", "vz");
+  idQw = logGetVarId("stateEstimate", "qw");
+  idQx = logGetVarId("stateEstimate", "qx");
+  idQy = logGetVarId("stateEstimate", "qy");
+  idQz = logGetVarId("stateEstimate", "qz");
+  idGyroX = logGetVarId("gyro", "x");
+  idGyroY = logGetVarId("gyro", "y");
+  idGyroZ = logGetVarId("gyro", "z");
+  idSnnType = paramGetVarId("snn_control_type","snnType");
 
   xTaskCreate(teensyTask, TEENSY_TASK_NAME, TEENSY_TASK_STACKSIZE, NULL, TEENSY_TASK_PRI, NULL);
 
@@ -277,18 +320,18 @@ void teensyTask(void* arg)
   }
 }
 
-int16_t teensyGetMotor1(void) {
+float teensyGetMotor1(void) {
     return myserial_control_out.motor_1;
 }
 
-int16_t teensyGetMotor2(void) {
+float teensyGetMotor2(void) {
     return myserial_control_out.motor_2;
 }
 
-int16_t teensyGetMotor3(void) {
+float teensyGetMotor3(void) {
     return myserial_control_out.motor_3;
 }
-int16_t teensyGetMotor4(void) {
+float teensyGetMotor4(void) {
     return myserial_control_out.motor_4;
 }
 
@@ -318,10 +361,10 @@ LOG_GROUP_START(snn_control)
 /**
  * @brief SNN control motor output 1 to 4
  */
-LOG_ADD(LOG_INT16, motor1, &myserial_control_out.motor_1)
-LOG_ADD(LOG_INT16, motor2, &myserial_control_out.motor_2)
-LOG_ADD(LOG_INT16, motor3, &myserial_control_out.motor_3)
-LOG_ADD(LOG_INT16, motor4, &myserial_control_out.motor_4)
+LOG_ADD(LOG_FLOAT, motor1, &myserial_control_out.motor_1)
+LOG_ADD(LOG_FLOAT, motor2, &myserial_control_out.motor_2)
+LOG_ADD(LOG_FLOAT, motor3, &myserial_control_out.motor_3)
+LOG_ADD(LOG_FLOAT, motor4, &myserial_control_out.motor_4)
 
 /**
  * @brief SNN control status
@@ -336,10 +379,16 @@ LOG_ADD(LOG_INT16, posz, &posz)
 LOG_ADD(LOG_FLOAT, velBodyX, &velBodyX)
 LOG_ADD(LOG_FLOAT, velBodyY, &velBodyY)
 LOG_ADD(LOG_FLOAT, velBodyZ, &velBodyZ)
-LOG_ADD(LOG_FLOAT, quatw, &quatw)
-LOG_ADD(LOG_FLOAT, quatx, &quatx)
-LOG_ADD(LOG_FLOAT, quaty, &quaty)
-LOG_ADD(LOG_FLOAT, quatz, &quatz)
+LOG_ADD(LOG_FLOAT, orient_1, &orient_1)
+LOG_ADD(LOG_FLOAT, orient_2, &orient_2)
+LOG_ADD(LOG_FLOAT, orient_3, &orient_3)
+LOG_ADD(LOG_FLOAT, orient_4, &orient_4)
+LOG_ADD(LOG_FLOAT, orient_5, &orient_5)
+LOG_ADD(LOG_FLOAT, orient_6, &orient_6)
+LOG_ADD(LOG_FLOAT, orient_7, &orient_7)
+LOG_ADD(LOG_FLOAT, orient_8, &orient_8)
+LOG_ADD(LOG_FLOAT, orient_9, &orient_9)
+
 LOG_ADD(LOG_FLOAT, gyroX, &gyroX)
 LOG_ADD(LOG_FLOAT, gyroY, &gyroY)
 LOG_ADD(LOG_FLOAT, gyroZ, &gyroZ) 
@@ -364,5 +413,10 @@ LOG_GROUP_STOP(imu)
 PARAM_GROUP_START(deck)
 
 PARAM_ADD_CORE(PARAM_UINT8 | PARAM_RONLY, bcTeensy, &isInit)
+// PARAM_ADD_CORE(PARAM_UINT8 | PARAM_RONLY, snnType, &snnType)
 
 PARAM_GROUP_STOP(deck)
+PARAM_GROUP_START(snn_control)
+PARAM_ADD_CORE(PARAM_UINT8, snnType, &snnType)
+PARAM_GROUP_STOP(snn_control)
+ 
