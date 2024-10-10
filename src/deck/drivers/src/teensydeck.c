@@ -151,7 +151,6 @@ void setControlInMessage(void)
     myserial_control_in.gyro_x = gyroX;
     myserial_control_in.gyro_y = gyroY;
     myserial_control_in.gyro_z = gyroZ;
-    myserial_control_in.type = snnType;
 
 }
 

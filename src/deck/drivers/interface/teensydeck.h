@@ -54,7 +54,7 @@ struct __attribute__((__packed__)) serial_control_in {
     float gyro_z;
 
     // type (0 for hover, 1 for follow)
-    uint8_t type;
+    // uint8_t type;
     //CHECKSUM
     uint8_t checksum_in;
 };

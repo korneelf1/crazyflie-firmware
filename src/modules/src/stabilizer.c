@@ -219,27 +219,27 @@ static void checkEmergencyStopTimeout()
   }
 }
 
-bool sates_within_bounds(state_t* state, sensorData_t* sensorData) {
-  if (state->velocity.x > 3.0f || state->velocity.x < -3.0f) {
-    return false;
-  }
-  if (state->velocity.y > 3.0f || state->velocity.y < -3.0f) {
-    return false;
-  }
-  if (state->velocity.z > 3.0f || state->velocity.z < -3.0f) {
-    return false;
-  }
-  if (sensorData->gyro.x > 90.0f || sensorData->gyro.x < -90.0f) {
-    return false;
-  }
-  if (sensorData->gyro.y > 90.0f || sensorData->gyro.y < -90.0f) {
-    return false;
-  }
-  if (sensorData->gyro.z > 90.0f || sensorData->gyro.z < -90.0f) {
-    return false;
-  }
-  return true;
-}
+// bool sates_within_bounds(state_t* state, sensorData_t* sensorData) {
+//   if (state->velocity.x > 3.0f || state->velocity.x < -3.0f) {
+//     return false;
+//   }
+//   if (state->velocity.y > 3.0f || state->velocity.y < -3.0f) {
+//     return false;
+//   }
+//   if (state->velocity.z > 3.0f || state->velocity.z < -3.0f) {
+//     return false;
+//   }
+//   if (sensorData->gyro.x > 90.0f || sensorData->gyro.x < -90.0f) {
+//     return false;
+//   }
+//   if (sensorData->gyro.y > 90.0f || sensorData->gyro.y < -90.0f) {
+//     return false;
+//   }
+//   if (sensorData->gyro.z > 90.0f || sensorData->gyro.z < -90.0f) {
+//     return false;
+//   }
+//   return true;
+// }
 
 static void batteryCompensation(const motors_thrust_uncapped_t* motorThrustUncapped, motors_thrust_uncapped_t* motorThrustBatCompUncapped)
 {
@@ -334,7 +334,7 @@ static void stabilizerTask(void* param)
       } else {
         powerDistribution(&control, &motorThrustUncapped);
         batteryCompensation(&motorThrustUncapped, &motorThrustBatCompUncapped);
-        if (useSNN && sates_within_bounds(&state, &sensorData)) {
+        if (useSNN ) {
           DEBUG_PRINT("USING SNN TO HOVER\n");
           
           motorPwm.motors.m1 = (teensyGetMotor1()+1.0f/2.0f)*UINT16_MAX;
