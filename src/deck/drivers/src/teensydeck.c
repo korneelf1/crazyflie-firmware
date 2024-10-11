@@ -261,7 +261,7 @@ void teensyInit(DeckInfo* info)
   idGyroX = logGetVarId("gyro", "x");
   idGyroY = logGetVarId("gyro", "y");
   idGyroZ = logGetVarId("gyro", "z");
-  idSnnType = paramGetVarId("snn_control_type","snnType");
+  idSnnType = paramGetVarId("snn_ct","snnType");
 
   xTaskCreate(teensyTask, TEENSY_TASK_NAME, TEENSY_TASK_STACKSIZE, NULL, TEENSY_TASK_PRI, NULL);
 
@@ -414,7 +414,7 @@ PARAM_ADD_CORE(PARAM_UINT8 | PARAM_RONLY, bcTeensy, &isInit)
 // PARAM_ADD_CORE(PARAM_UINT8 | PARAM_RONLY, snnType, &snnType)
 PARAM_GROUP_STOP(deck)
 
-PARAM_GROUP_START(snn_control_type)
+PARAM_GROUP_START(snn_ct)
 PARAM_ADD_CORE(PARAM_UINT8, snnType, &snnType)
-PARAM_GROUP_STOP(snn_control_type)
+PARAM_GROUP_STOP(snn_ct)
  

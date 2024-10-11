@@ -907,6 +907,6 @@ LOG_ADD(LOG_INT32, m4req, &motorThrustBatCompUncapped.motors.m4)
 LOG_GROUP_STOP(motor)
 
 
-PARAM_GROUP_START(snn_motor_control)
+PARAM_GROUP_START(snn_mc)
 PARAM_ADD(PARAM_UINT8, use_snn, &useSNN)
-PARAM_GROUP_STOP(snn_motor_control)
+PARAM_GROUP_STOP(snn_mc)
