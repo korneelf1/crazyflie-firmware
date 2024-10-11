@@ -410,12 +410,11 @@ LOG_ADD(LOG_FLOAT, gyroZ, &gyroZ)
 LOG_GROUP_STOP(imu)
 
 PARAM_GROUP_START(deck)
-
 PARAM_ADD_CORE(PARAM_UINT8 | PARAM_RONLY, bcTeensy, &isInit)
 // PARAM_ADD_CORE(PARAM_UINT8 | PARAM_RONLY, snnType, &snnType)
-
 PARAM_GROUP_STOP(deck)
-PARAM_GROUP_START(snn_control)
+
+PARAM_GROUP_START(snn_control_type)
 PARAM_ADD_CORE(PARAM_UINT8, snnType, &snnType)
-PARAM_GROUP_STOP(snn_control)
+PARAM_GROUP_STOP(snn_control_type)
  
