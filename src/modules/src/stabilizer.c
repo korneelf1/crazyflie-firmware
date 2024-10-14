@@ -219,27 +219,6 @@ static void checkEmergencyStopTimeout()
   }
 }
 
-// bool sates_within_bounds(state_t* state, sensorData_t* sensorData) {
-//   if (state->velocity.x > 3.0f || state->velocity.x < -3.0f) {
-//     return false;
-//   }
-//   if (state->velocity.y > 3.0f || state->velocity.y < -3.0f) {
-//     return false;
-//   }
-//   if (state->velocity.z > 3.0f || state->velocity.z < -3.0f) {
-//     return false;
-//   }
-//   if (sensorData->gyro.x > 90.0f || sensorData->gyro.x < -90.0f) {
-//     return false;
-//   }
-//   if (sensorData->gyro.y > 90.0f || sensorData->gyro.y < -90.0f) {
-//     return false;
-//   }
-//   if (sensorData->gyro.z > 90.0f || sensorData->gyro.z < -90.0f) {
-//     return false;
-//   }
-//   return true;
-// }
 
 static void batteryCompensation(const motors_thrust_uncapped_t* motorThrustUncapped, motors_thrust_uncapped_t* motorThrustBatCompUncapped)
 {
@@ -342,23 +321,9 @@ static void stabilizerTask(void* param)
           motorPwm.motors.m3 = (teensyGetMotor3()+1.0f/2.0f)*UINT16_MAX;
           motorPwm.motors.m4 = (teensyGetMotor4()+1.0f/2.0f)*UINT16_MAX;
           setMotorRatios(&motorPwm);
-          DEBUG_PRINT("Motor 1: %f\n", (double)(teensyGetMotor1()));
-          DEBUG_PRINT("Motor 2: %f\n", (double)(teensyGetMotor2()));
-          DEBUG_PRINT("Motor 3: %f\n", (double)(teensyGetMotor3() ));
-          DEBUG_PRINT("Motor 4: %f\n", (double)(teensyGetMotor4() ));
 
           } else {
-          // DEBUG_PRINT("USING DEFAULT CONTROLLER\n");
-          DEBUG_PRINT("Motor 1: %f\n", (double)(teensyGetMotor1() + 1.0f / 2.0f));
-          DEBUG_PRINT("Motor 1 Default: %f\n", (double)(motorThrustBatCompUncapped.list[0] ));
 
-          DEBUG_PRINT("Motor 2: %f\n", (double)(teensyGetMotor2() + 1.0f / 2.0f));
-          DEBUG_PRINT("Motor 2 Default: %f\n", (double)(motorThrustBatCompUncapped.list[1] ));
-          DEBUG_PRINT("Motor 3: %f\n", (double)(teensyGetMotor3() + 1.0f / 2.0f));
-          DEBUG_PRINT("Motor 3 Default: %f\n", (double)(motorThrustBatCompUncapped.list[2] ));
-          DEBUG_PRINT("Motor 4: %f\n", (double)(teensyGetMotor4() + 1.0f / 2.0f));
-          DEBUG_PRINT("Motor 4 Default: %f\n", (double)(motorThrustBatCompUncapped.list[3] ));
-          
           powerDistributionCap(&motorThrustBatCompUncapped, &motorPwm);
 
           setMotorRatios(&motorPwm);
