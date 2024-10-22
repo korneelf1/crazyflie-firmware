@@ -313,13 +313,13 @@ static void stabilizerTask(void* param)
       } else {
         powerDistribution(&control, &motorThrustUncapped);
         batteryCompensation(&motorThrustUncapped, &motorThrustBatCompUncapped);
-        if (useSNN ) {
+        if (useSNN && teensyGetStatus()) {
           DEBUG_PRINT("USING SNN TO HOVER\n");
           
-          motorPwm.motors.m1 = (teensyGetMotor1()+1.0f/2.0f)*UINT16_MAX;
-          motorPwm.motors.m2 = (teensyGetMotor2()+1.0f/2.0f)*UINT16_MAX;
-          motorPwm.motors.m3 = (teensyGetMotor3()+1.0f/2.0f)*UINT16_MAX;
-          motorPwm.motors.m4 = (teensyGetMotor4()+1.0f/2.0f)*UINT16_MAX;
+          motorPwm.motors.m1 = (int)(teensyGetMotor1()+1.0f/2.0f)*UINT16_MAX;
+          motorPwm.motors.m2 = (int)(teensyGetMotor2()+1.0f/2.0f)*UINT16_MAX;
+          motorPwm.motors.m3 = (int)(teensyGetMotor3()+1.0f/2.0f)*UINT16_MAX;
+          motorPwm.motors.m4 = (int)(teensyGetMotor4()+1.0f/2.0f)*UINT16_MAX;
           setMotorRatios(&motorPwm);
 
           } else {
@@ -444,12 +444,12 @@ LOG_ADD(LOG_FLOAT, ay, &setpoint.acceleration.y)
 /**
  * @brief Desired acceleration Z [m/s^2]
  */
-LOG_ADD(LOG_FLOAT, az, &setpoint.acceleration.z)
+LOG_ADD_CORE(LOG_FLOAT, az, &setpoint.acceleration.z)
 
 /**
  * @brief Desired attitude, roll [deg]
  */
-LOG_ADD(LOG_FLOAT,roll, &setpoint.attitude.roll)
+LOG_ADD_CORE(LOG_FLOAT,roll, &setpoint.attitude.roll)
 
 /**
  * @brief Desired attitude, pitch [deg]

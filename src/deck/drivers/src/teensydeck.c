@@ -98,8 +98,11 @@ void setControlInMessage(void)
     qx = logGetFloat(idQx);
     qy = logGetFloat(idQy);
     qz = logGetFloat(idQz);
-
-    //     rlt::set(observation, 0,  3 + 0, (1 - 2*qy*qy - 2*qz*qz));
+    // qw = 0.0f;
+    // qx = 0.0f;
+    // qy = 0.0f;
+    // qz = 0.0f;
+    // rlt::set(observation, 0,  3 + 0, (1 - 2*qy*qy - 2*qz*qz));
     // rlt::set(observation, 0,  3 + 1, (    2*qx*qy - 2*qw*qz));
     // rlt::set(observation, 0,  3 + 2, (    2*qx*qz + 2*qw*qy));
     // rlt::set(observation, 0,  3 + 3, (    2*qx*qy + 2*qw*qz));
@@ -131,9 +134,9 @@ void setControlInMessage(void)
         myserial_control_in.pos_y = posy-posy_target;
         myserial_control_in.pos_z = posz-posz_target;
     } else {
-        myserial_control_in.pos_x = 0;
-        myserial_control_in.pos_y = 0;
-        myserial_control_in.pos_z = 0;
+        myserial_control_in.pos_x = posx-posx_target;
+        myserial_control_in.pos_y = posy-posy_target;
+        myserial_control_in.pos_z = posz-posz_target;
     }
 
     myserial_control_in.vel_x = velBodyX;
@@ -151,25 +154,11 @@ void setControlInMessage(void)
     myserial_control_in.gyro_x = gyroX;
     myserial_control_in.gyro_y = gyroY;
     myserial_control_in.gyro_z = gyroZ;
+    // DEBUG_PRINT("Just set control in message, GYROX:%f\n",(double) gyroX);
+
 
 }
 
-// void setTargetState(float* state) 
-// {
-//     target_state.pos_x = state[0];
-//     target_state.pos_y = state[1];
-//     target_state.pos_z = state[2];
-//     target_state.vel_x = state[3];
-//     target_state.vel_y = state[4];
-//     target_state.vel_z = state[5];
-//     target_state.quat_w = state[6];
-//     target_state.quat_x = state[7];
-//     target_state.quat_y = state[8];
-//     target_state.quat_z = state[9];
-//     target_state.gyro_x = state[10];
-//     target_state.gyro_y = state[11];
-//     target_state.gyro_z = state[12];
-// }
 // Read a control out message over uart
 void uartReadControlOutMessage(void) 
 {
@@ -205,8 +194,7 @@ void uartReadControlOutMessage(void)
         }
         else {
             DEBUG_PRINT("Incorrect message\n");
-            DEBUG_PRINT("Checksum: %d\n", checksum_in_local);
-            DEBUG_PRINT("Message: %d\n", serial_cf_msg_buf_out[sizeof(struct serial_control_out)]);
+
         }
         // receiving done; set to false
         receiving = false;
@@ -310,6 +298,10 @@ void teensyTask(void* arg)
     uint32_t now_ms = T2M(xTaskGetTickCount());
     if (now_ms - xLastDebugTime > 1000) {
         DEBUG_PRINT("received %i messages in the last second, spent %i ms sending, %i, setting message, %i receiving\n", serial_cf_received_packets, sending_outer, set_control_outer, receiving_outer);
+        // check status, if not status, reinit
+        if (!status) {
+            DEBUG_PRINT("Connection lost\n");
+        }
         serial_cf_received_packets = 0;
         sending_outer = 0;
         receiving_outer = 0;
@@ -372,21 +364,24 @@ LOG_ADD(LOG_UINT8, status, &status)
 /**
  * @brief SNN inputs
  */
-LOG_ADD(LOG_INT16, posx, &posx)
-LOG_ADD(LOG_INT16, posy, &posy)
-LOG_ADD(LOG_INT16, posz, &posz)
+LOG_ADD(LOG_FLOAT, posx, &posx)
+LOG_ADD(LOG_FLOAT, posy, &posy)
+LOG_ADD(LOG_FLOAT, posz, &posz)
+LOG_ADD(LOG_FLOAT, posx_target, &posx_target)
+LOG_ADD(LOG_FLOAT, posy_target, &posy_target)
+LOG_ADD(LOG_FLOAT, posz_target, &posz_target)
 LOG_ADD(LOG_FLOAT, velBodyX, &velBodyX)
 LOG_ADD(LOG_FLOAT, velBodyY, &velBodyY)
 LOG_ADD(LOG_FLOAT, velBodyZ, &velBodyZ)
-LOG_ADD(LOG_FLOAT, orient_1, &orient_1)
-LOG_ADD(LOG_FLOAT, orient_2, &orient_2)
-LOG_ADD(LOG_FLOAT, orient_3, &orient_3)
-LOG_ADD(LOG_FLOAT, orient_4, &orient_4)
-LOG_ADD(LOG_FLOAT, orient_5, &orient_5)
-LOG_ADD(LOG_FLOAT, orient_6, &orient_6)
-LOG_ADD(LOG_FLOAT, orient_7, &orient_7)
-LOG_ADD(LOG_FLOAT, orient_8, &orient_8)
-LOG_ADD(LOG_FLOAT, orient_9, &orient_9)
+// LOG_ADD(LOG_FLOAT, orient_1, &orient_1)
+// LOG_ADD(LOG_FLOAT, orient_2, &orient_2)
+// LOG_ADD(LOG_FLOAT, orient_3, &orient_3)
+// LOG_ADD(LOG_FLOAT, orient_4, &orient_4)
+// LOG_ADD(LOG_FLOAT, orient_5, &orient_5)
+// LOG_ADD(LOG_FLOAT, orient_6, &orient_6)
+// LOG_ADD(LOG_FLOAT, orient_7, &orient_7)
+// LOG_ADD(LOG_FLOAT, orient_8, &orient_8)
+// LOG_ADD(LOG_FLOAT, orient_9, &orient_9)
 
 LOG_ADD(LOG_FLOAT, gyroX, &gyroX)
 LOG_ADD(LOG_FLOAT, gyroY, &gyroY)

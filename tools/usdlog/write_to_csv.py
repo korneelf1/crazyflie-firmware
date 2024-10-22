@@ -38,12 +38,12 @@ for key in keys:
     data[key] = logData[key]
 
 # determine start and end points and clip data
-plt.subplot(1, 1, 1)
-plt.plot(logData['acc.z'], '-', label='acc z')
-plt.xlabel('index')
-plt.ylabel('thrust')
-plt.legend(loc=9, ncol=4, borderaxespad=0.)
-plt.show()
+# plt.subplot(1, 1, 1)
+# plt.plot(logData['acc.z'], '-', label='acc z')
+# plt.xlabel('index')
+# plt.ylabel('thrust')
+# plt.legend(loc=9, ncol=4, borderaxespad=0.)
+# plt.show()
 
 # plt.subplot(1, 1, 1)
 # plt.plot(logData['controller.pitch'], '-', label='p')
