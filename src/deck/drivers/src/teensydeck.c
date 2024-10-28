@@ -44,7 +44,7 @@
 
 static bool isInit = false;
 bool status = false;
-
+bool warmUp = false;
 
 //////////////COMMUNICATION VARIABLES///////////////////
 #define START_BYTE_SERIAL_CF 0x9A
@@ -77,6 +77,7 @@ float motor1, motor2, motor3, motor4;
 
 paramVarId_t idSnnType;
 int snnType;
+bool warmUp;
 
 void serialParseMessageOut(void)
 {
@@ -98,10 +99,6 @@ void setControlInMessage(void)
     qx = logGetFloat(idQx);
     qy = logGetFloat(idQy);
     qz = logGetFloat(idQz);
-    // qw = 0.0f;
-    // qx = 0.0f;
-    // qy = 0.0f;
-    // qz = 0.0f;
     // rlt::set(observation, 0,  3 + 0, (1 - 2*qy*qy - 2*qz*qz));
     // rlt::set(observation, 0,  3 + 1, (    2*qx*qy - 2*qw*qz));
     // rlt::set(observation, 0,  3 + 2, (    2*qx*qz + 2*qw*qy));
@@ -154,6 +151,7 @@ void setControlInMessage(void)
     myserial_control_in.gyro_x = gyroX;
     myserial_control_in.gyro_y = gyroY;
     myserial_control_in.gyro_z = gyroZ;
+    myserial_control_in.warmUp = warmUp;
     // DEBUG_PRINT("Just set control in message, GYROX:%f\n",(double) gyroX);
 
 
@@ -411,5 +409,5 @@ PARAM_GROUP_STOP(deck)
 
 PARAM_GROUP_START(snn_ct)
 PARAM_ADD_CORE(PARAM_UINT8, snnType, &snnType)
+PARAM_ADD_CORE(PARAM_UINT8, warmUp, &warmUp)
 PARAM_GROUP_STOP(snn_ct)
- 
