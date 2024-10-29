@@ -317,10 +317,10 @@ static void stabilizerTask(void* param)
         if (useSNN && teensyGetStatus()) {
           DEBUG_PRINT("USING SNN TO HOVER\n");
           SNN_inuse = true;
-          motorPwm.motors.m1 = (int)(teensyGetMotor1()+1.0f/2.0f)*UINT16_MAX;
-          motorPwm.motors.m2 = (int)(teensyGetMotor2()+1.0f/2.0f)*UINT16_MAX;
-          motorPwm.motors.m3 = (int)(teensyGetMotor3()+1.0f/2.0f)*UINT16_MAX;
-          motorPwm.motors.m4 = (int)(teensyGetMotor4()+1.0f/2.0f)*UINT16_MAX;
+          motorPwm.motors.m1 = (int)((teensyGetMotor1()+1.0f)/2.0f)*UINT16_MAX;
+          motorPwm.motors.m2 = (int)((teensyGetMotor2()+1.0f)/2.0f)*UINT16_MAX;
+          motorPwm.motors.m3 = (int)((teensyGetMotor3()+1.0f)/2.0f)*UINT16_MAX;
+          motorPwm.motors.m4 = (int)((teensyGetMotor4()+1.0f)/2.0f)*UINT16_MAX;
           // motorThrustUncapped.motors.m1 = (int)((teensyGetMotor1()+1.0f)/2.0f)*UINT16_MAX;
           // motorThrustUncapped.motors.m2 = (int)((teensyGetMotor2()+1.0f)/2.0f)*UINT16_MAX;
           // motorThrustUncapped.motors.m3 = (int)((teensyGetMotor3()+1.0f)/2.0f)*UINT16_MAX;
