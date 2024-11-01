@@ -34,20 +34,16 @@ struct __attribute__((__packed__)) serial_control_in {
     float pos_x;
     float pos_y;
     float pos_z;
+
+    //attitude
+    float qw;
+    float qx;
+    float qy;
+    float qz;
     //velocity
     float vel_x;
     float vel_y;
     float vel_z;
-    //attitude
-    float orient_1;
-    float orient_2;
-    float orient_3;
-    float orient_4;
-    float orient_5;
-    float orient_6;
-    float orient_7;
-    float orient_8;
-    float orient_9;
     //gyro
     float gyro_x;
     float gyro_y;

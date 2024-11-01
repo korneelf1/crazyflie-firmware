@@ -315,18 +315,14 @@ static void stabilizerTask(void* param)
         powerDistribution(&control, &motorThrustUncapped);
         
         if (useSNN && teensyGetStatus()) {
-          DEBUG_PRINT("USING SNN TO HOVER\n");
-          SNN_inuse = true;
-          motorPwm.motors.m1 = (int)((teensyGetMotor1()+1.0f)/2.0f)*UINT16_MAX;
-          motorPwm.motors.m2 = (int)((teensyGetMotor2()+1.0f)/2.0f)*UINT16_MAX;
-          motorPwm.motors.m3 = (int)((teensyGetMotor3()+1.0f)/2.0f)*UINT16_MAX;
-          motorPwm.motors.m4 = (int)((teensyGetMotor4()+1.0f)/2.0f)*UINT16_MAX;
-          // motorThrustUncapped.motors.m1 = (int)((teensyGetMotor1()+1.0f)/2.0f)*UINT16_MAX;
-          // motorThrustUncapped.motors.m2 = (int)((teensyGetMotor2()+1.0f)/2.0f)*UINT16_MAX;
-          // motorThrustUncapped.motors.m3 = (int)((teensyGetMotor3()+1.0f)/2.0f)*UINT16_MAX;
-          // motorThrustUncapped.motors.m4 = (int)((teensyGetMotor4()+1.0f)/2.0f)*UINT16_MAX;
+          // DEBUG_PRINT("USING SNN TO HOVER\n");
           // batteryCompensation(&motorThrustUncapped, &motorThrustBatCompUncapped);
           // powerDistributionCap(&motorThrustBatCompUncapped, &motorPwm);
+          SNN_inuse = true;
+          motorPwm.motors.m1 = (uint16_t)(((teensyGetMotor1() + 1.0f) / 2.0f) * UINT16_MAX);
+          motorPwm.motors.m2 = (uint16_t)(((teensyGetMotor2() + 1.0f) / 2.0f) * UINT16_MAX);
+          motorPwm.motors.m3 = (uint16_t)(((teensyGetMotor3() + 1.0f) / 2.0f) * UINT16_MAX);
+          motorPwm.motors.m4 = (uint16_t)(((teensyGetMotor4() + 1.0f) / 2.0f) * UINT16_MAX);
 
           setMotorRatios(&motorPwm);
 
@@ -847,10 +843,10 @@ LOG_GROUP_STOP(stateEstimateZ)
 
 LOG_GROUP_START(og_ctrl)
 // add motorThrustUncapped
-LOG_ADD(LOG_INT32, m1, &motorThrustUncapped.list[0])
-LOG_ADD(LOG_INT32, m2, &motorThrustUncapped.list[1])
-LOG_ADD(LOG_INT32, m3, &motorThrustUncapped.list[2])
-LOG_ADD(LOG_INT32, m4, &motorThrustUncapped.list[3])
+LOG_ADD(LOG_UINT16, m1, &motorPwm.motors.m1)
+LOG_ADD(LOG_UINT16, m2, &motorPwm.motors.m2)
+LOG_ADD(LOG_UINT16, m3, &motorPwm.motors.m3)
+LOG_ADD(LOG_UINT16, m4, &motorPwm.motors.m4)
 LOG_ADD(LOG_UINT8, snn_in_use, &SNN_inuse)
 LOG_GROUP_STOP(og_ctrl)
 
