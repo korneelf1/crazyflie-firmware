@@ -44,40 +44,37 @@
 
 static bool isInit = false;
 bool status = false;
-bool warmUp = false;
 
 //////////////COMMUNICATION VARIABLES///////////////////
 #define START_BYTE_SERIAL_CF 0x9A
 
-struct serial_control_in myserial_control_in;
+static struct serial_control_in myserial_control_in;
 struct serial_control_out myserial_control_out;
 // struct target_state mytarget_state;
-uint8_t serial_cf_msg_buf_out[ 2*sizeof(struct serial_control_out) ] = {0};
-uint16_t serial_cf_buf_out_cnt = 0;
-int serial_cf_received_packets = 0;
+static uint8_t serial_cf_msg_buf_out[ 2*sizeof(struct serial_control_out) ] = {0};
+static uint16_t serial_cf_buf_out_cnt = 0;
+static int serial_cf_received_packets = 0;
 
-bool receiving;
-bool sending;
+static bool receiving;
+static bool sending;
 
-int receiving_outer = 0;
-int sending_outer = 0;
-int set_control_outer = 0;
+static int receiving_outer = 0;
+static int sending_outer = 0;
+static int set_control_outer = 0;
 
 /////////////INTERNAL LOG VARIABLES
-logVarId_t idPosx, idPosy, idPosz, idVelBodyX, idVelBodyY, idVelBodyZ;
-float posx, posy, posz, velBodyX, velBodyY, velBodyZ;
-logVarId_t idPosx_target, idPosy_target, idPosz_target;
-float posx_target, posy_target, posz_target;
-logVarId_t idQw, idQx, idQy, idQz;
-float qw,qx,qy,qz, orient_1, orient_2, orient_3, orient_4, orient_5, orient_6, orient_7, orient_8, orient_9;
-logVarId_t idGyroX, idGyroY, idGyroZ, idAccX, idAccY, idAccZ;
-float gyroX, gyroY, gyroZ, accX, accY, accZ;
-logVarId_t idMotor1, idMotor2, idMotor3, idMotor4;
-float motor1, motor2, motor3, motor4;
+static logVarId_t idPosx, idPosy, idPosz, idVelBodyX, idVelBodyY, idVelBodyZ;
+static float posx, posy, posz, velBodyX, velBodyY, velBodyZ;
+static logVarId_t idPosx_target, idPosy_target, idPosz_target;
+static float posx_target, posy_target, posz_target;
+static logVarId_t idQw, idQx, idQy, idQz;
+static float qw,qx,qy,qz;
+static logVarId_t idGyroX, idGyroY, idGyroZ;
+static float gyroX, gyroY, gyroZ, accX, accY, accZ;
 
-paramVarId_t idSnnType;
-int snnType;
-bool warmUp;
+static paramVarId_t idSnnType;
+static int snnType;
+static bool warmUp;
 
 void serialParseMessageOut(void)
 {
